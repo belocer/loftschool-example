@@ -83,26 +83,7 @@ function upperProps(obj) {
     }
     return arr;
 }
-/*
- Задача 8 *:
- Напишите аналог встроенного метода slice для работы с массивами
- */
-/*function slice(array, from, to) {
- var result = [];
- for(var i = from; i < array.length; i++){
- if (i == to) {
- return result;
- }
- result.push(array[i]);
- }
- }*/
-/*
- Задача 9 *:
- Функция принимает объект и должна вернуть Proxy для этого объекта
- Proxy должен перехватывать все попытки записи значений свойств и возводить это значение в квадрат
- */
-// function createProxy(obj) {
-// }
+
 export {
     forEach,
     map,
