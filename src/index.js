@@ -84,6 +84,7 @@ function upperProps(obj) {
     return arr;
 }
 
+
 export {
     forEach,
     map,
