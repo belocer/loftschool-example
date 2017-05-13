@@ -103,7 +103,6 @@ function upperProps(obj) {
  */
 // function createProxy(obj) {
 // }
-
 export {
     forEach,
     map,

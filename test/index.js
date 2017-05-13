@@ -203,7 +203,5 @@ describe('ДЗ 3 - объекты и массивы', () => {
 
             assert.deepEqual(result, target);
         });
-    });
-
-    
+    });    
 });
