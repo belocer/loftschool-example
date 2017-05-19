@@ -1,96 +1,135 @@
-/* ДЗ 3 - работа с массивами и объеектами */
+/* ДЗ 4 - работа с DOM */
 
-/*
- Задача 1:
- Напишите аналог встроенного метода forEach для работы с массивами
+/**
+ * Функция должна создать элемент с тегом DIV, поместить в него текстовый узел и вернуть получившийся элемент
+ *
+ * @param {string} text - текст, который необходимо поместить в div
+ * @return {Element}
  */
-function forEach(array, fn) {
-    for (var i = 0; i < array.length; i++) {
-        fn(array[i], i, array);
-    }
+function createDivWithText(text) {
+    var div = document.createElement('div');
+    div.innerText = text;
+    return div;
 }
 
-/*
- Задача 2:
- Напишите аналог встроенного метода map для работы с массивами
+/**
+ * Функция должна создать элемент с тегом A, установить значение для атрибута href и вернуть получившийся элемент
+ *
+ * @param {string} hrefValue - значение для атрибута href
+ * @return {Element}
  */
-function map(array, fn) {
-    var copy_array = [];
-    for (var i = 0; i < array.length; i++) {
-        copy_array[i] = fn(array[i], i, array);
-    }
-    return copy_array;
+function createAWithHref(hrefValue) {
+    var a = document.createElement('a');
+    a.href = hrefValue;
+    return a;
 }
 
-/*
- Задача 3:
- Напишите аналог встроенного метода reduce для работы с массивами
+/**
+ * Функция должна вставлять элемент what в начало элемента where
+ *
+ * @param {Element} what - что вставлять
+ * @param {Element} where - куда вставлять
  */
-function reduce(array, fn, initial) {
-    var x = initial || array[0],
-        i = initial ? 0 : 1;
-
-    for (; i < array.length; i++) {
-        x = fn(x, array[i], i, array);
-    }
-
-    return x;
+function prepend(what, where) {
+    where.prepend(what);
 }
 
-/*
- Задача 4:
- Функция принимает объект и имя свойства, которое необходиом удалить из объекта
- Функция должна удалить указанное свойство из указанного объекта
+/**
+ * Функция должна перебрать все дочерние элементы элемента where
+ * и вернуть массив, состоящий из тех дочерних элементов
+ * следующим соседом которых является элемент с тегом P
+ * Рекурсия - по желанию
+ *
+ * @param {Element} where - где искать
+ * @return {Array<Element>}
+ *
+ * @example
+ * для html '<div></div><p></p><a></a><span></span><p></p>'
+ * функция должна вернуть: [div, span]
+ * т.к. следующим соседом этих элементов является элемент с тегом P
  */
-function deleteProperty(obj, prop) {
-    delete obj[prop];
-}
-
-/*
- Задача 5:
- Функция принимает объект и имя свойства и возвращает true или false
- Функция должна проверить существует ли укзаанное свойство в указанном объекте
- */
-function hasProperty(obj, prop) {
-    if (prop in obj) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/*
- Задача 6:
- Функция должна получить все перечисляемые свойства объекта и вернуть их в виде массива
- */
-function getEnumProps(obj) {
+function findAllPSiblings(where) {
+    var w = where.children;
     var arr = [];
-    for (var key in obj) {
-        arr.push(key);
+    for (var i = 0; i < w.length - 1; i++) {
+        if (w[i].nextElementSibling.nodeName === 'P') {
+            arr.push(w[i]);
+        }
     }
     return arr;
 }
 
-/*
- Задача 7:
- Функция должна перебрать все свойства объекта, преобразовать их имена в верхний регистра и вернуть в виде массива
+/**
+ * Функция должна перебрать все дочерние узлы типа "элемент" внутри where
+ * и вернуть массив, состоящий из текстового содержимого перебираемых элементов
+ * Но похоже, что в код закралась ошибка, которую нужно найти и исправить
+ *
+ * @param {Element} where - где искать
+ * @return {Array<string>}
  */
-function upperProps(obj) {
-    var arr = [];
-    for (var key in obj) {
-        key = key.toUpperCase();
-        arr.push(key);
+function findError(where) {
+    var result = [];
+
+    for (var i = 0; i < where.childNodes.length; i++) {
+        if (where.childNodes[i].nodeType === 1) {
+            result.push(where.childNodes[i].innerText);
+        }
     }
-    return arr;
+    return result;
 }
 
+/**
+ * Функция должна перебрать все дочерние узлы элемента where
+ * и удалить из него все текстовые узлы
+ * Без рекурсии!
+ * Будьте внимательны при удалении узлов,
+ * можно получить неожиданное поведение при переборе узлов
+ *
+ * @param {Element} where - где искать
+ *
+ * @example
+ * после выполнения функции, дерево <div></div>привет<p></p>loftchool!!!
+ * должно быть преобразовано в <div></div><p></p>
+ */
+function deleteTextNodes(where) {
+    var w = where.childNodes;
+    for (var i = 0; i < w.length; i++) {
+        if (w[i].nodeType === 3) {
+            w[i].parentNode.removeChild(w[i]);
+        }
+    }
+}
+
+/**
+ * Выполнить предудыщее задание с использование рекурсии
+ * то есть необходимо заходить внутрь каждого дочернего элемента
+ *
+ * @param {Element} where - где искать
+ *
+ * @example
+ * после выполнения функции, дерево <span> <div> <b>привет</b> </div> <p>loftchool</p> !!!</span>
+ * должно быть преобразовано в <span><div><b></b></div><p></p></span>
+ */
+function deleteTextNodesRecursive(where) {
+
+    for (let i = 0; i < where.childNodes.length; i++) {
+        let child = where.childNodes[i];
+
+        if (child.nodeType === 3) {
+            where.removeChild(child); //удаляем ребенка
+            i--; // уменьшаем счетчик т.к. все сместилось
+        } else if (child.nodeType === 1) {
+            deleteTextNodesRecursive(child); // вызываем рекурсию
+        }
+    }
+}
 
 export {
-    forEach,
-    map,
-    reduce,
-    deleteProperty,
-    hasProperty,
-    getEnumProps,
-    upperProps
+    createDivWithText,
+    createAWithHref,
+    prepend,
+    findAllPSiblings,
+    findError,
+    deleteTextNodes,
+    deleteTextNodesRecursive
 };

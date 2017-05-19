@@ -1,207 +1,129 @@
-const nativeSlice = Array.prototype.slice;
-const nativeMap = Array.prototype.map;
-const nativeReduce = Array.prototype.reduce;
-
 import { assert } from 'chai';
-import { randomValue as random, randomNumberArray } from '../helper';
+import { randomValue } from '../helper';
 import {
-    forEach,
-    map,
-    reduce,
-    deleteProperty,
-    hasProperty,
-    getEnumProps,
-    upperProps,
-    slice,
-    createProxy
+    createDivWithText,
+    createAWithHref,
+    prepend,
+    findAllPSiblings,
+    findError,
+    deleteTextNodes,
+    deleteTextNodesRecursive,
+    collectDOMStat,
+    observeChildNodes
 } from '../src/index';
 
-describe('ДЗ 3 - объекты и массивы', () => {
-    describe('forEach', () => {
-        it('должна вызывать функцию для каждого элемента массива и передавать элемент первым аргументом', () => {
-            let array = randomNumberArray();
-            let passed = [];
+function random(type) {
+    let result = randomValue(type);
 
-            forEach(array, el => passed.push(el));
+    if (type == 'string') {
+        return encodeURIComponent(result);
+    }
 
-            assert.deepEqual(array, passed);
+    return result;
+}
+
+describe('ДЗ 4 - Работа с DOM', () => {
+    describe('createDivWithText', () => {
+        it('должна возвращать элемент с тегом DIV', () => {
+            let text = random('string');
+            let result = createDivWithText(text);
+
+            assert.instanceOf(result, Element);
+            assert.equal(result.tagName, 'DIV');
         });
 
-        it('должна передавать индекс элемента вторым аргументом', () => {
-            let array = randomNumberArray();
-            let index = 0;
+        it('должна добавлять текст в элемент', () => {
+            let text = random('string');
+            let result = createDivWithText(text);
 
-            forEach(array, (el, i) => assert.equal(i, index++));
-        });
-
-        it('должна передавать сам массив третьим аргументом', () => {
-            let array = randomNumberArray();
-
-            forEach(array, (el, i, a) => assert.strictEqual(a, array));
-        });
-    });
-
-    describe('map', () => {
-        it('должна вызывать функцию для каждого элемента массива и передавать элемент первым аргументом', () => {
-            let array = randomNumberArray();
-            let passed = [];
-
-            map(array, el => passed.push(el));
-
-            assert.deepEqual(array, passed);
-        });
-
-        it('должна передавать индекс элемента вторым аргументом', () => {
-            let array = randomNumberArray();
-            let index = 0;
-
-            map(array, (el, i) => assert.equal(i, index++));
-        });
-
-        it('должна передавать сам массив третьим аргументом', () => {
-            let array = randomNumberArray();
-
-            map(array, (el, i, a) => assert.strictEqual(a, array));
-        });
-
-        it('должна возвращать измененную копию массива', () => {
-            let array = randomNumberArray();
-            let target = nativeMap.call(array, el => el ** 2);
-            let result = map(array, el => el ** 2);
-
-            assert.deepEqual(result, target);
-        });
-
-        it('не должна изменять оригинальный массив', () => {
-            let array = randomNumberArray();
-            let arrayCopy = nativeSlice.call(array);
-
-            map(array, el => el ** 2);
-            assert.deepEqual(array, arrayCopy);
+            assert.equal(result.innerText, text);
         });
     });
 
-    describe('reduce', () => {
-        it('должна вызывать функцию для каждого элемента и передавать предыдущий результат первым аргументом', () => {
-            let array = randomNumberArray();
-            let i = 0;
-            let prevResult = array[0];
+    describe('createAWithHref', () => {
+        it('должна возвращать элемент с тегом A', () => {
+            let href = `http://${random('string')}.com`;
+            let result = createAWithHref(href);
 
-            reduce(array, prev => {
-                assert.equal(prev, prevResult);
-
-                return prevResult = i++;
-            });
+            assert.instanceOf(result, Element);
+            assert.equal(result.tagName, 'A');
         });
 
-        it('должна учитывать initial', () => {
-            let array = randomNumberArray();
-            let passed = [];
-            let initial = random('number');
+        it('должна добавлять атрибут href', () => {
+            let href = `http://${random('string')}.com`;
+            let result = createAWithHref(href);
 
-            reduce(array, prev => passed.push(prev), initial);
-            assert.deepEqual(passed[0], initial);
-        });
-
-        it('если initial не указан, то при первой итерации в prev передается первый элемент массива', () => {
-            let array = randomNumberArray();
-            let passed = [];
-
-            reduce(array, prev => passed.push(prev));
-            assert.strictEqual(passed[0], array[0]);
-        });
-
-        it('должна передавать элемент вторым аргументом', () => {
-            let array = randomNumberArray();
-            let passed = [];
-            let initial = random('number');
-
-            reduce(array, (prev, el) => passed.push(el));
-            assert.deepEqual(array.slice(1), passed);
-
-            passed = [];
-            reduce(array, (prev, el) => passed.push(el), initial); // с учетом initial
-            assert.deepEqual(array, passed);
-        });
-
-        it('должна передавать индекс элемента третьим аргументом', () => {
-            let array = randomNumberArray();
-            let index = 1;
-            let initial = random('number');
-
-            reduce(array, (prev, el, i) => assert.equal(i, index++));
-
-            index = 0;
-            reduce(array, (prev, el, i) => assert.equal(i, index++), initial); // с учетом initial
-        });
-
-        it('должна передавать сам массив четвертым аргументом', () => {
-            let array = randomNumberArray();
-
-            reduce(array, (prev, el, i, a) => assert.strictEqual(a, array));
-        });
-
-        it('не должна изменять оригинальный массив', () => {
-            let array = randomNumberArray();
-            let arrayCopy = nativeSlice.call(array);
-
-            reduce(array, el => el ** 2);
-            assert.deepEqual(array, arrayCopy);
-        });
-
-        it('общая проверка работоспособности', () => {
-            let array = randomNumberArray();
-            let target = nativeReduce.call(array, (prev, el) => prev + el);
-            let result = reduce(array, (prev, el) => prev + el);
-            let initial = random('number');
-
-            assert.deepEqual(result, target);
-
-            target = nativeReduce.call(array, (prev, el) => prev + el, initial);
-            result = reduce(array, (prev, el) => prev + el, initial);
-            assert.deepEqual(result, target);
+            assert.equal(result.getAttribute('href'), href);
         });
     });
 
-    describe('deleteProperty', () => {
-        it('должна удалять указанное свойство из объекта', () => {
-            let obj = { a: 1 };
+    describe('prepend', () => {
+        it('должна добавлять элемент в начало', () => {
+            let where = document.createElement('div');
+            let what = document.createElement('p');
+            let whereText = random('string');
+            let whatText = random('string');
 
-            deleteProperty(obj, 'a');
+            where.innerHTML = `, <b>${whereText}</b>!`;
+            what.innerText = whatText;
 
-            assert.notProperty(obj, 'a');
+            prepend(what, where);
+
+            assert.equal(where.firstChild, what);
+            assert.equal(where.innerHTML, `<p>${whatText}</p>, <b>${whereText}</b>!`);
         });
     });
 
-    describe('hasProperty', () => {
-        it('должна возвращать true если объект имеет указанное свойство и false в противном случае', () => {
-            let obj = { a: 1 };
-
-            assert.isTrue(hasProperty(obj, 'a'));
-            assert.isFalse(hasProperty(obj, 'b'));
-        });
-    });
-
-    describe('getEnumProps', () => {
-        it('должна возвращать массив только с перечисляемыми свойствами', () => {
-            let obj = { a: 1, b: 2 };
-            let target = ['a', 'b'];
+    describe('findAllPSiblings', () => {
+        it('должна возвращать массив с элементами, соседями которых являются P', () => {
+            let where = document.createElement('div');
             let result;
 
-            Object.defineProperty(obj, 'c', { enumerable: false });
-            result = getEnumProps(obj);
+            where.innerHTML = '<div></div><p></p><span></span><span></span><p></p>';
+            result = findAllPSiblings(where);
 
-            assert.deepEqual(result, target);
+            assert.isTrue(Array.isArray(result));
+            assert.deepEqual(result, [where.children[0], where.children[3]]);
         });
     });
 
-    describe('upperProps', () => {
-        it('должна возвращать массив с именами свойств и преобразовывать эти имена в верхний регистр', () => {
-            let obj = { a: 1, b: 2 };
-            let target = ['A', 'B'];
-            let result = upperProps(obj);
+    describe('findError', () => {
+        it('должна возвращать массив из текстового содержимого элементов', () => {
+            let where = document.createElement('div');
+            let text1 = random('string');
+            let text2 = random('string');
+            let result;
 
-            assert.deepEqual(result, target);
+            where.innerHTML = ` <div>${text1}</div>, <div>${text2}</div>!!!`;
+            result = findError(where);
+
+            assert.isTrue(Array.isArray(result));
+            assert.deepEqual(result, [text1, text2]);
         });
-    });    
+    });
+
+    describe('deleteTextNodes', () => {
+        it('должна удалить все текстовые узлы', () => {
+            let where = document.createElement('div');
+
+            where.innerHTML = ` <div></div>${random('string')}<p></p>${random('string')}`;
+            deleteTextNodes(where);
+
+            assert.equal(where.innerHTML, '<div></div><p></p>');
+        });
+    });
+
+    describe('deleteTextNodesRecursive', () => {
+        it('должна рекурсивно удалить все текстовые узлы', () => {
+            let where = document.createElement('div');
+            let text1 = random('string');
+            let text2 = random('string');
+            let text3 = random('string');
+
+            where.innerHTML = `<span> <div> <b>${text1}</b> </div> <p>${text2}</p> ${text3}</span>`;
+            deleteTextNodesRecursive(where);
+
+            assert.equal(where.innerHTML, '<span><div><b></b></div><p></p></span>');
+        });
+    });  
 });
