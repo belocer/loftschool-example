@@ -86,7 +86,7 @@ let filterBlock = homeworkContainer.querySelector('#filter-block');
 let filterInput = homeworkContainer.querySelector('#filter-input');
 let filterResult = homeworkContainer.querySelector('#filter-result');
 let townsPromise;
-let cities= [];
+let cities = [];
 
 loadTowns()
     .then(res => {
@@ -95,7 +95,7 @@ loadTowns()
         filterBlock.style.display = 'block';
     });
 
-filterInput.addEventListener('keyup', function() {
+filterInput.addEventListener('keyup', function () {
     filterResult.innerHTML = filterInput.value ?
         cities
             .filter(item => isMatching(item.name, filterInput.value))
