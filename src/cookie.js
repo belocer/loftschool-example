@@ -52,73 +52,44 @@ function getCookies() {
         }, {});
 }
 
-var cookie_obj = getCookies();
-for (let key in cookie_obj) {
-    var td_Tr = document.createElement('tr');
-    td_Tr.innerHTML = '<td class="first_td">' + key + '</td><td>' + cookie_obj[key] + '</td><td><button class="del" data-key="' + key + '">Удалить</button></td>';
-    listTable.appendChild(td_Tr);
+function isMatching(full, chunk) {
+    if (full.toLowerCase().indexOf(chunk.toLowerCase()) !== -1) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
-var del_cookie = document.querySelectorAll('.del');
-for (var i = 0; i < del_cookie.length; i++) {
-    del_cookie[i].addEventListener('click', (e) => {
+// при первой загрузке
+renderTable();
+
+// Удаление
+listTable.addEventListener('click', function (e) {
+    console.log(e.target);
+    if (e.target.dataset.key) {
         document.cookie = e.target.dataset.key + `=;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-        e.target.parentNode.style.display = 'none';
-        e.target.parentNode.previousElementSibling.style.display = 'none';
-        e.target.parentNode.previousElementSibling.previousElementSibling.style.display = 'none';
-    });
-}
+    }
+    renderTable();
+});
+
 // Поиск в объекте
 filterNameInput.addEventListener('keyup', function () {
-
-    function isMatching(full, chunk) {
-        if (full.toLowerCase().indexOf(chunk.toLowerCase()) !== -1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    var arr = [];
-    for (let index in cookie_obj) {
-        arr.push(index + ':' + cookie_obj[index]);
-    }
-    var arr_result = [];
-    arr_result = arr.filter(function (element) {
-        return isMatching(element, filterNameInput.value);
-    });
-
-    var result_split = [];
-    listTable.innerHTML = '';
-      arr_result.forEach(function (element) {
-          result_split = element.split(':');
-          var td_Tr = document.createElement('tr');
-          td_Tr.innerHTML = '<td class="first_td">' + result_split[0] + '</td><td>' + result_split[1] + '</td><td><button class="del" data-key="' + result_split[0] + '">Удалить</button></td>';
-          listTable.appendChild(td_Tr);
-     });
+    renderTable();
 });
 
+// Добавление куки
 addButton.addEventListener('click', () => {
-    var i = 0;
-    for (var key in cookie_obj) {
-        if (addNameInput.value == key) {
-            document.cookie = `${key}=${addValueInput.value}`;
-            i++;
-        }
-    }
-    if (i != 0) {
-        var first_td = document.querySelectorAll('.first_td');
-        for (var s = 0; s < first_td.length; s++) {
-            if (first_td[s].innerText == addNameInput.value) {
-                first_td[s].nextElementSibling.innerHTML = addValueInput.value;
-            }
-        }
-    } else if (i == 0) {
-        document.cookie = `${addNameInput.value}=${addValueInput.value}`;
-        var td_Tr = document.createElement('tr');
-        td_Tr.innerHTML = '<td class="first_td">' + addNameInput.value + '</td><td>' + addValueInput.value + '</td><td><button class="del" data-key="' + addNameInput.value + '">Удалить</button></td>';
-        listTable.appendChild(td_Tr);
-    }
-    addNameInput.value = ' ';
-    addValueInput.value = ' ';
+    document.cookie = `${addNameInput.value} = ${addValueInput.value}`;
+    renderTable();
 });
+
+// функция рендеринга
+function renderTable() {
+    const cookie_obj = getCookies();
+    listTable.innerHTML = '';
+    for (let key in cookie_obj) {
+        if(!(isMatching(key,filterNameInput.value) || isMatching(cookie_obj[key], filterNameInput.value))) continue;
+        listTable.innerHTML += `<tr><td class="first_td">${key}</td><td>${cookie_obj[key]}</td><td><button class="del" 
+        data-key="${key}">Удалить</button></td></tr>`;
+    }
+}
